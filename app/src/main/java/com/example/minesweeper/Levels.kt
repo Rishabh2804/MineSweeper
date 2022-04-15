@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -38,9 +39,10 @@ class Levels : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_levels)
 
-
+        playButton.isEnabled = false // Game can't be started without difficulty selection
         buttons.forEachIndexed { i, button ->
             button.setOnClickListener {
+                playButton.isEnabled = true
                 level = Difficulties.values()[i]
                 updateLayout(level)
             }
@@ -87,19 +89,30 @@ class Levels : AppCompatActivity() {
         }
 
         playButton.setOnClickListener {
-            if(level == Difficulties.CUSTOM){
 
-            }
-            val intent = Intent(this, GameScreen::class.java).apply {
-                putExtra("Board Type", level.ordinal)
+            if (level == Difficulties.CUSTOM) {
+                customValues.forEach {
+                    if (it.text.isBlank()) {
+                        Toast.makeText(this, "Constraints field is empty!!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            } else {
+                val intent = Intent(this, GameScreen::class.java).apply {
+                    putExtra("Board Type", level.ordinal)
+                    if (level == Difficulties.CUSTOM) {
+                        putExtra("Rows", customValues[0].text.toString().toInt())
+                        putExtra("Columns", customValues[1].text.toString().toInt())
+                        putExtra("Mines", customValues[2].text.toString().toInt())
+                    }
+                }
+                startActivity(intent)
             }
         }
-
-
     }
 
     private fun alert() {
-        TODO("Not yet implemented")
+        Toast.makeText(this, "Alert Message!!", Toast.LENGTH_SHORT).show()
     }
 
     fun updateLayout(level: Difficulties) {
