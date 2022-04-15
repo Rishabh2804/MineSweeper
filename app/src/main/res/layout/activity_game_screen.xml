@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".GameScreen">
+
+    <Chronometer
+        android:id="@+id/timer"
+        android:layout_width="76dp"
+        android:layout_height="29dp"
+        android:textSize="20sp"
+        tools:layout_editor_absoluteX="350dp"
+        tools:layout_editor_absoluteY="22dp" />
+
+    <TextView
+        android:id="@+id/mines"
+        android:layout_width="64dp"
+        android:layout_height="30dp"
+        android:text="000"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        tools:layout_editor_absoluteX="50dp"
+        tools:layout_editor_absoluteY="22dp" />
+
+    <ImageView
+        android:id="@+id/mineIMG"
+        android:layout_width="36dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/mines"
+        app:srcCompat="@drawable/mine"
+        tools:layout_editor_absoluteY="22dp" />
+
+    <LinearLayout
+        android:id="@+id/playingArea"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline5">
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="65dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="80dp" />
+
+    <ImageButton
+        android:id="@+id/restart"
+        android:layout_width="99dp"
+        android:layout_height="51dp"
+        android:layout_marginTop="12dp"
+        android:foregroundGravity="center"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playingArea"
+        app:srcCompat="@drawable/restart" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
