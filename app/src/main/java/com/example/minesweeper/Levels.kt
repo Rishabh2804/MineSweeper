@@ -88,7 +88,7 @@ class Levels : AppCompatActivity() {
 
         playButton.setOnClickListener {
             if(level == Difficulties.CUSTOM){
-                
+
             }
             val intent = Intent(this, GameScreen::class.java).apply {
                 putExtra("Board Type", level.ordinal)
