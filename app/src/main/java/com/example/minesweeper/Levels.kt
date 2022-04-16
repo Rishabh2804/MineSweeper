@@ -1,11 +1,8 @@
 package com.example.minesweeper
 
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -16,9 +13,9 @@ import androidx.core.view.isVisible
 
 class Levels : AppCompatActivity() {
 
-    var level = Difficulties.NONE
+    private var level = Difficulties.NONE
 
-    val colors = arrayOf<Int>(
+    private val colors = arrayOf(
         R.color.green,
         R.color.cyan,
         R.color.red,
@@ -26,14 +23,14 @@ class Levels : AppCompatActivity() {
         R.color.selected
     )
 
-    val buttons = arrayOf<Button>(
-        findViewById<Button>(R.id.easy),
-        findViewById<Button>(R.id.medium),
-        findViewById<Button>(R.id.hard),
-        findViewById<Button>(R.id.custom)
+    private val buttons = arrayOf<Button>(
+        findViewById(R.id.easy),
+        findViewById(R.id.medium),
+        findViewById(R.id.hard),
+        findViewById(R.id.custom)
     )
 
-    val playButton = findViewById<Button>(R.id.startGame)
+    private val playButton: Button = findViewById(R.id.startGame)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +112,7 @@ class Levels : AppCompatActivity() {
         Toast.makeText(this, "Alert Message!!", Toast.LENGTH_SHORT).show()
     }
 
-    fun updateLayout(level: Difficulties) {
+    private fun updateLayout(level: Difficulties) {
         for (i in 0..3) {
             if (i == level.ordinal) {
                 buttons[i].setBackgroundColor(ContextCompat.getColor(this, colors[4]))

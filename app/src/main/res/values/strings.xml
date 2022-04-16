@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MineSweeper</string>
+    <string name="startGameMsg">On To The Battle Field!!</string>
+    <string name="backgroundDesc">minesweeper background</string>
 </resources>
