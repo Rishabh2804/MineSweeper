@@ -16,34 +16,44 @@ class Levels : AppCompatActivity() {
     private var level = Difficulties.NONE
 
     private val colors = arrayOf(
-        R.color.green,
+        R.color.yellow,
         R.color.cyan,
         R.color.red,
         R.color.white,
         R.color.selected
     )
 
-    private val buttons = arrayOf<Button>(
-        findViewById(R.id.easy),
-        findViewById(R.id.medium),
-        findViewById(R.id.hard),
-        findViewById(R.id.custom)
-    )
-
-    private val playButton: Button = findViewById(R.id.startGame)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_levels)
 
+        val buttons = arrayOf<Button>(
+            this.findViewById(R.id.easy),
+            this.findViewById(R.id.medium),
+            this.findViewById(R.id.hard),
+            this.findViewById(R.id.custom)
+        )
+
+        val playButton: Button = findViewById(R.id.startGame)
+
         playButton.isEnabled = false // Game can't be started without difficulty selection
+        updateLayout(level, buttons, playButton)
+
         buttons.forEachIndexed { i, button ->
             button.setOnClickListener {
                 playButton.isEnabled = true
                 level = Difficulties.values()[i]
-                updateLayout(level)
+                updateLayout(level, buttons, playButton)
             }
         }
+
+        val whiteSpace = findViewById<ConstraintLayout>(R.id.EmptySpace)
+        whiteSpace.setOnClickListener {
+            level = Difficulties.NONE
+            playButton.isEnabled = false
+            updateLayout(level, buttons, playButton)
+        }
+
 
         val increes = arrayOf<ImageButton>(
             findViewById(R.id.moreRows),
@@ -89,19 +99,20 @@ class Levels : AppCompatActivity() {
 
             if (level == Difficulties.CUSTOM) {
                 customValues.forEach {
-                    if (it.text.isBlank()) {
-                        Toast.makeText(this, "Constraints field is empty!!", Toast.LENGTH_SHORT)
-                            .show()
-                    }
+                    val rows = customValues[0].text.toString().toInt()
+                    val cols = customValues[1].text.toString().toInt()
+                    val mines = customValues[2].text.toString().toInt()
+
+                    val intent = Intent(this, GameScreen::class.java)
+                    intent.putExtra("Difficulty", level.ordinal)
+                    intent.putExtra("Rows", rows)
+                    intent.putExtra("Columns", cols)
+                    intent.putExtra("Mines", mines)
+                    startActivity(intent)
                 }
             } else {
                 val intent = Intent(this, GameScreen::class.java).apply {
-                    putExtra("Board Type", level.ordinal)
-                    if (level == Difficulties.CUSTOM) {
-                        putExtra("Rows", customValues[0].text.toString().toInt())
-                        putExtra("Columns", customValues[1].text.toString().toInt())
-                        putExtra("Mines", customValues[2].text.toString().toInt())
-                    }
+                    putExtra("Difficulty", level.ordinal)
                 }
                 startActivity(intent)
             }
@@ -112,7 +123,7 @@ class Levels : AppCompatActivity() {
         Toast.makeText(this, "Alert Message!!", Toast.LENGTH_SHORT).show()
     }
 
-    private fun updateLayout(level: Difficulties) {
+    private fun updateLayout(level: Difficulties, buttons: Array<Button>, playbutton: Button) {
         for (i in 0..3) {
             if (i == level.ordinal) {
                 buttons[i].setBackgroundColor(ContextCompat.getColor(this, colors[4]))
@@ -123,6 +134,17 @@ class Levels : AppCompatActivity() {
 
         val customDiffMenu = findViewById<ConstraintLayout>(R.id.customDiff)
         customDiffMenu.isVisible = level == Difficulties.CUSTOM
+
+        if (playbutton.isEnabled) {
+            playbutton.setBackgroundColor(ContextCompat.getColor(this, R.color.play_button_enabled))
+        } else {
+            playbutton.setBackgroundColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.play_button_disabled
+                )
+            )
+        }
     }
 
     fun handleCustom() {

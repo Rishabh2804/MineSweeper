@@ -10,7 +10,19 @@
     <color name="red">#DF1A0C</color>
     <color name="cyan" >#18DDF6</color>
     <color name="green">#2AC730</color>
+    <color name="yellow">#FFCF00</color>
     <color name="selected">#E68942</color>
+    <color name="play_button_disabled">#979493</color>
+    <color name="play_button_enabled">#2AC730</color>
+
+    <color name="color1">#5E6060</color>
+    <color name="color2">#CDDC39</color>
+    <color name="color3">#4CAF50</color>
+    <color name="color4">#2196F3</color>
+    <color name="color5">#FF9800</color>
+    <color name="color6">#9C27B0</color>
+    <color name="color7">#BA0744</color>
+    <color name="color8">#4E1402</color>
 
 
 </resources>
