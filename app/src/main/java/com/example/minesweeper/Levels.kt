@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 
 class Levels : AppCompatActivity() {
-
+    private var username: String?=""
     private var level = Difficulties.NONE
 
     private val colors = arrayOf(
@@ -26,7 +26,8 @@ class Levels : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_levels)
-
+        val intent: Intent= intent
+        username = intent.getStringExtra("Name")
         val buttons = arrayOf<Button>(
             this.findViewById(R.id.easy),
             this.findViewById(R.id.medium),
@@ -96,26 +97,25 @@ class Levels : AppCompatActivity() {
         }
 
         playButton.setOnClickListener {
-
+            lateinit var intent:Intent
             if (level == Difficulties.CUSTOM) {
-                customValues.forEach {
                     val rows = customValues[0].text.toString().toInt()
                     val cols = customValues[1].text.toString().toInt()
                     val mines = customValues[2].text.toString().toInt()
 
-                    val intent = Intent(this, GameScreen::class.java)
+                    intent = Intent(this, GameScreen::class.java)
                     intent.putExtra("Difficulty", level.ordinal)
                     intent.putExtra("Rows", rows)
                     intent.putExtra("Columns", cols)
                     intent.putExtra("Mines", mines)
-                    startActivity(intent)
-                }
+                    intent.putExtra("Name",username)
             } else {
-                val intent = Intent(this, GameScreen::class.java).apply {
+                 intent = Intent(this, GameScreen::class.java).apply {
                     putExtra("Difficulty", level.ordinal)
+                    putExtra("Name",username)
                 }
-                startActivity(intent)
             }
+            startActivity(intent)
         }
     }
 
@@ -145,10 +145,6 @@ class Levels : AppCompatActivity() {
                 )
             )
         }
-    }
-
-    fun handleCustom() {
-
     }
 }
 
