@@ -20,8 +20,8 @@ class Levels : AppCompatActivity() {
         R.color.yellow,
         R.color.cyan,
         R.color.red,
-        R.color.white,
-        R.color.selected
+        R.color.black,
+        R.color.un_selected
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,9 +127,9 @@ class Levels : AppCompatActivity() {
     private fun updateLayout(level: Difficulties, buttons: Array<Button>, playbutton: Button) {
         for (i in 0..3) {
             if (i == level.ordinal) {
-                buttons[i].setBackgroundColor(ContextCompat.getColor(this, colors[4]))
-            } else {
                 buttons[i].setBackgroundColor(ContextCompat.getColor(this, colors[i]))
+            } else {
+                buttons[i].setBackgroundColor(ContextCompat.getColor(this, R.color.un_selected))
             }
         }
 

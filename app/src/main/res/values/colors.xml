@@ -8,10 +8,13 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="red">#DF1A0C</color>
-    <color name="cyan" >#18DDF6</color>
+    <color name="cyan">#18DDF6</color>
     <color name="green">#2AC730</color>
     <color name="yellow">#FFCF00</color>
-    <color name="selected">#E68942</color>
+    <color name="grey">#979493</color>
+
+    <color name="un_selected">#E68942</color>
+
     <color name="play_button_disabled">#979493</color>
     <color name="play_button_enabled">#2AC730</color>
 
