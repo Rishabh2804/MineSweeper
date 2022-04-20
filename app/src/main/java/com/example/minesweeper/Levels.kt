@@ -10,9 +10,10 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import com.example.minesweeper.enums.Difficulties
 
 class Levels : AppCompatActivity() {
-    private var username: String?=""
+    private var username: String? = ""
     private var level = Difficulties.NONE
 
     private val colors = arrayOf(
@@ -26,7 +27,7 @@ class Levels : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_levels)
-        val intent: Intent= intent
+        val intent: Intent = intent
         username = intent.getStringExtra("Name")
         val buttons = arrayOf<Button>(
             this.findViewById(R.id.easy),
@@ -97,22 +98,22 @@ class Levels : AppCompatActivity() {
         }
 
         playButton.setOnClickListener {
-            lateinit var intent:Intent
+            lateinit var intent: Intent
             if (level == Difficulties.CUSTOM) {
-                    val rows = customValues[0].text.toString().toInt()
-                    val cols = customValues[1].text.toString().toInt()
-                    val mines = customValues[2].text.toString().toInt()
+                val rows = customValues[0].text.toString().toInt()
+                val cols = customValues[1].text.toString().toInt()
+                val mines = customValues[2].text.toString().toInt()
 
-                    intent = Intent(this, GameScreen::class.java)
-                    intent.putExtra("Difficulty", level.ordinal)
-                    intent.putExtra("Rows", rows)
-                    intent.putExtra("Columns", cols)
-                    intent.putExtra("Mines", mines)
-                    intent.putExtra("Name",username)
+                intent = Intent(this, GameScreen::class.java)
+                intent.putExtra("Difficulty", level.ordinal)
+                intent.putExtra("Rows", rows)
+                intent.putExtra("Columns", cols)
+                intent.putExtra("Mines", mines)
+                intent.putExtra("Name", username)
             } else {
-                 intent = Intent(this, GameScreen::class.java).apply {
+                intent = Intent(this, GameScreen::class.java).apply {
                     putExtra("Difficulty", level.ordinal)
-                    putExtra("Name",username)
+                    putExtra("Name", username)
                 }
             }
             startActivity(intent)

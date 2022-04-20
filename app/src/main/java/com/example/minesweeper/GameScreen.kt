@@ -6,12 +6,29 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.widget.*
 import androidx.core.content.ContextCompat
+import com.example.minesweeper.enums.Difficulties
+import com.example.minesweeper.enums.MineMode
+import com.example.minesweeper.enums.Status
 import kotlin.random.Random
 
 class GameScreen : AppCompatActivity() {
+
+    private var rows = 0
+    private var columns = 0
+    private var mines = 0
+    private var flags = 0
+    private var revealedCells = 0
+
+    private var gameStatus = Status.NOT_STARTED
+    private lateinit var mode: MineMode
     var firstMove: Boolean = true
 
-    private lateinit var preferences: SharedPreferences
+    private lateinit var mineIndicator: TextView
+    private lateinit var flagBombSwitch: ImageButton
+    private lateinit var clock: Chronometer
+
+    private lateinit var mineField: Array<Array<MineFieldCell>>
+    private lateinit var board: LinearLayout
     private val cellColors = arrayOf(
         R.color.color1,
         R.color.color2,
@@ -23,28 +40,15 @@ class GameScreen : AppCompatActivity() {
         R.color.color8,
     )
 
-    private var rows = 0
-    private var columns = 0
-    private var mines = 0
-    private var flags = 0
-    private var revealedCells = 0
-    private lateinit var noOfMines: TextView
-    private var Status = status.NOT_STARTED
-
-    val xDir = arrayOf(0, 1, 0, -1, -1, 1, 1, -1)
-    val yDir = arrayOf(1, 0, -1, 0, 1, 1, -1, -1)
-
-    private var flagMode = false
-    private lateinit var flagBombSwitch: ImageButton
+    private lateinit var preferences: SharedPreferences
     private val difficulties = arrayOf(
         Dimensions(8, 8, 10),
         Dimensions(12, 12, 25),
         Dimensions(16, 16, 40),
     )
 
-    private lateinit var MineField: Array<Array<MineFieldCell>>
-    private lateinit var Board: LinearLayout
-    private lateinit var Clock: Chronometer
+    private val xDir = arrayOf(0, 1, 0, -1, -1, 1, 1, -1)
+    private val yDir = arrayOf(1, 0, -1, 0, 1, 1, -1, -1)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,24 +61,30 @@ class GameScreen : AppCompatActivity() {
             rows = intent.getIntExtra("Rows", 0)
             columns = intent.getIntExtra("Columns", 0)
             mines = intent.getIntExtra("Mines", 0)
-            flags = mines
         } else {
             rows = difficulties[difficulty].rows
             columns = difficulties[difficulty].columns
             mines = difficulties[difficulty].mines
-            flags = mines
         }
 
-        Board = findViewById(R.id.playingArea)
-        Clock = findViewById(R.id.timer)
+        flags = mines
 
-        noOfMines = findViewById(R.id.mines)
-        noOfMines.text = mines.toString()
+        board = findViewById(R.id.playingArea)
+        clock = findViewById(R.id.timer)
+        mode = MineMode.REVEAL //Reveal mode by default
+
+        mineIndicator = findViewById(R.id.mines)
+        mineIndicator.text = mines.toString()
 
         flagBombSwitch = findViewById(R.id.flagBombSwitch)
         flagBombSwitch.setOnClickListener {
-            flagMode = !flagMode
-            if (flagMode) {
+
+            mode = if (mode == MineMode.FLAG)
+                MineMode.REVEAL
+            else
+                MineMode.FLAG
+
+            if (mode == MineMode.FLAG) {
                 flagBombSwitch.setImageDrawable(
                     ContextCompat.getDrawable(
                         this,
@@ -89,7 +99,7 @@ class GameScreen : AppCompatActivity() {
     }
 
     private fun setField() { // Very Important
-        MineField = Array(rows) { Array(columns) { MineFieldCell(this) } }
+        mineField = Array(rows) { Array(columns) { MineFieldCell(this) } }
         val buttonParams = LinearLayout.LayoutParams(
             0,
             LinearLayout.LayoutParams.MATCH_PARENT
@@ -111,9 +121,9 @@ class GameScreen : AppCompatActivity() {
                 button.layoutParams = buttonParams
                 buttonParams.weight = 1.0F
                 button.setOnClickListener {
-                    if (Status == status.NOT_STARTED) {
+                    if (gameStatus == Status.NOT_STARTED) {
                         startTimer()
-                        Status = status.ONGOING
+                        gameStatus = Status.ONGOING
                         Toast.makeText(this, "Don't die too soon!!", Toast.LENGTH_SHORT).show()
                         setMines(i, j)
                     }
@@ -121,17 +131,17 @@ class GameScreen : AppCompatActivity() {
 
                     displayBoard()
                     checkWin()
-                    if (Status != status.ONGOING) {
+                    if (gameStatus != Status.ONGOING) {
                         showResult()
                     }
 
                 }
                 id++
-                MineField[i][j] = button
+                mineField[i][j] = button
 
                 linearLayout.addView(button)
             }
-            Board.addView(linearLayout)
+            board.addView(linearLayout)
 
         }
     }
@@ -146,31 +156,31 @@ class GameScreen : AppCompatActivity() {
     }
 
     private fun makeMove(i: Int, j: Int) {
-        if (flagMode) {
-            if (MineField[i][j].isRevealed)
+        if (mode == MineMode.FLAG) {
+            if (mineField[i][j].isRevealed)
                 return
 
-            if (MineField[i][j].isFlagged) {
-                MineField[i][j].isFlagged = false
+            if (mineField[i][j].isFlagged) {
+                mineField[i][j].isFlagged = false
                 flags++
-                noOfMines.text = flags.toString()
+                mineIndicator.text = flags.toString()
                 return
             } else {
                 if (flags <= 0) {
                     Toast.makeText(this, "No more flags left!!", Toast.LENGTH_SHORT).show()
                     return
                 } else {
-                    MineField[i][j].isFlagged = true
+                    mineField[i][j].isFlagged = true
                     flags--
-                    noOfMines.text = flags.toString()
+                    mineIndicator.text = flags.toString()
                 }
             }
         } else {
-            if (MineField[i][j].isRevealed || MineField[i][j].isFlagged)
+            if (mineField[i][j].isRevealed || mineField[i][j].isFlagged)
                 return
 
-            if (MineField[i][j].isMine) {
-                Status = status.LOST
+            if (mineField[i][j].isMine) {
+                gameStatus = Status.LOST
             } else {
                 revealedCells++
                 reveal(i, j)
@@ -179,27 +189,27 @@ class GameScreen : AppCompatActivity() {
     }
 
     private fun checkWin() = if (rows * columns - revealedCells == mines) {
-        Status = status.WON
+        gameStatus = Status.WON
     } else {
         // Do Nothing.
     }
 
     private fun reveal(i: Int, j: Int) {
-        if (MineField[i][j].isRevealed || MineField[i][j].isFlagged || MineField[i][j].isMine)
+        if (mineField[i][j].isRevealed || mineField[i][j].isFlagged || mineField[i][j].isMine)
             return
 
-        MineField[i][j].isRevealed = true
+        mineField[i][j].isRevealed = true
         for (k in 0 until 8) {
-            var x = i + xDir[k]
-            var y = j + yDir[k]
+            val x = i + xDir[k]
+            val y = j + yDir[k]
             reveal(x, y)
         }
 
     }
 
     private fun startTimer() {
-        Clock.base = SystemClock.elapsedRealtime()
-        Clock.start()
+        clock.base = SystemClock.elapsedRealtime()
+        clock.start()
     }
 
     private fun updateBoard(mineFieldCell: MineFieldCell) {
@@ -221,7 +231,7 @@ class GameScreen : AppCompatActivity() {
             val x = i + xDir[k]
             val y = j + yDir[k]
             if (x in 0 until rows && y in 0 until columns) {
-                if (!MineField[x][y].isMine) {
+                if (!mineField[x][y].isMine) {
                     return true
                 }
             }
@@ -232,15 +242,15 @@ class GameScreen : AppCompatActivity() {
 
     private fun setMines(i: Int, j: Int) {
 
-        var mine: Int = 0
+        var mine = 0
         while (mine < mines) {
             val x = Random(System.nanoTime()).nextInt(0, rows)
             val y = Random(System.nanoTime()).nextInt(0, columns)
 
             if (x != i && y != j) {
                 if (!checkSafeNeighbour(x, y)) {
-                    MineField[x][y].isMine = true
-                    MineField[x][y].value = -1
+                    mineField[x][y].isMine = true
+                    mineField[x][y].value = -1
                     mine++
                     plantValues(x, y)
                 }
@@ -253,8 +263,8 @@ class GameScreen : AppCompatActivity() {
             val x = i + xDir[k]
             val y = j + yDir[k]
             if (x in 0 until rows && y in 0 until columns) {
-                if (!MineField[x][y].isMine) {
-                    MineField[x][y].value++
+                if (!mineField[x][y].isMine) {
+                    mineField[x][y].value++
                 }
             }
         }
