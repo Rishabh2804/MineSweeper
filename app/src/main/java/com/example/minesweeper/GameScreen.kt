@@ -154,12 +154,12 @@ class GameScreen : AppCompatActivity() {
     private fun displayBoard() {
         for(i in 0 until rows)
             for(j in 0 until columns){
-                with(MineField[i][j]){
+                with(mineField[i][j]){
                 if(isRevealed){
-                    displayRevealedCell(MineField[i][j])
+                    displayRevealedCell(mineField[i][j])
                 } else {
                     if(isFlagged){
-                        if(Status== status.LOST && !isMine)
+                        if(gameStatus== Status.LOST && !isMine)
                             setBackgroundResource(R.drawable.flag)
                         else
                             setBackgroundResource(R.drawable.flag)
