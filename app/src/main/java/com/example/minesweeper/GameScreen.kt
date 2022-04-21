@@ -152,7 +152,21 @@ class GameScreen : AppCompatActivity() {
     }
 
     private fun displayBoard() {
-        TODO("Not yet implemented")
+        for(i in 0 until rows)
+            for(j in 0 until columns){
+                with(MineField[i][j]){
+                if(isRevealed){
+                    displayRevealedCell(MineField[i][j])
+                } else {
+                    if(isFlagged){
+                        if(Status== status.LOST && !isMine)
+                            setBackgroundResource(R.drawable.flag)
+                        else
+                            setBackgroundResource(R.drawable.flag)
+                    }
+                }
+            }
+        }
     }
 
     private fun makeMove(i: Int, j: Int) {
@@ -212,7 +226,7 @@ class GameScreen : AppCompatActivity() {
         clock.start()
     }
 
-    private fun updateBoard(mineFieldCell: MineFieldCell) {
+    private fun displayRevealedCell(mineFieldCell: MineFieldCell) {
         with(mineFieldCell) {
             when (value) {
                 0 -> text = ""
