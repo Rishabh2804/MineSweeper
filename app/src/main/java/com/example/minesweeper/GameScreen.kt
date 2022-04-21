@@ -262,7 +262,7 @@ class GameScreen : AppCompatActivity() {
             val y = Random(System.nanoTime()).nextInt(0, columns)
 
             if (x != i && y != j) {
-                if (!checkSafeNeighbour(x, y)) {
+                if (checkSafeNeighbour(x, y)) {
                     mineField[x][y].isMine = true
                     mineField[x][y].value = -1
                     mine++
