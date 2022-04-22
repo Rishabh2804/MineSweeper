@@ -116,6 +116,7 @@ class Levels : AppCompatActivity() {
                     putExtra("Name", username)
                 }
             }
+            finish()
             startActivity(intent)
         }
     }
@@ -146,6 +147,12 @@ class Levels : AppCompatActivity() {
                 )
             )
         }
+
+    }
+
+    override fun onBackPressed() {
+        finish()
+        super.onBackPressed()
     }
 }
 

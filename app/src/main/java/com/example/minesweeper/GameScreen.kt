@@ -1,5 +1,7 @@
 package com.example.minesweeper
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -26,6 +28,7 @@ class GameScreen : AppCompatActivity() {
     private lateinit var mineIndicator: TextView
     private lateinit var flagBombSwitch: ImageButton
     private lateinit var clock: Chronometer
+    private lateinit var restart: ImageButton
 
     private lateinit var mineField: Array<Array<MineFieldCell>>
     private lateinit var board: LinearLayout
@@ -69,6 +72,7 @@ class GameScreen : AppCompatActivity() {
 
         flags = mines
 
+        preferences= getSharedPreferences("GameStats", 0)
         board = findViewById(R.id.playingArea)
         clock = findViewById(R.id.timer)
         mode = MineMode.REVEAL //Reveal mode by default
@@ -99,6 +103,10 @@ class GameScreen : AppCompatActivity() {
                     )
                 )
             }
+        }
+        restart= findViewById(R.id.restart)
+        restart.setOnClickListener {
+            restartGame()
         }
         setField()
     }
@@ -136,10 +144,9 @@ class GameScreen : AppCompatActivity() {
                     makeMove(i, j)
                     displayBoard()
                     checkWin()
-//                    if (gameStatus != Status.ONGOING) {
-//                        showResult()
-//                    }
-
+                    if (gameStatus != Status.ONGOING) {
+                        showResult()
+                    }
                 }
                 id++
                 mineField[i][j] = button
@@ -151,8 +158,8 @@ class GameScreen : AppCompatActivity() {
     }
 
     private fun showResult() {
-
-
+        clock.stop()
+        val current_score= (SystemClock.elapsedRealtime()-clock.base).toInt()
     }
 
     private fun displayBoard() {
@@ -204,13 +211,12 @@ class GameScreen : AppCompatActivity() {
             if (mineField[i][j].isMine) {
                 gameStatus = Status.LOST
             } else {
-                revealedCells++
                 reveal(i, j)
             }
         }
     }
 
-    private fun checkWin() = if (rows * columns - revealedCells == mines) {
+    private fun checkWin() = if (((rows * columns) - revealedCells) == mines) {
         gameStatus = Status.WON
     } else {
         // Do Nothing.
@@ -221,14 +227,15 @@ class GameScreen : AppCompatActivity() {
             return
         if (mineField[i][j].isRevealed || mineField[i][j].isFlagged || mineField[i][j].isMine)
             return
-
+        revealedCells++
         mineField[i][j].isRevealed = true
+        if(mineField[i][j].value!=0)
+            return
         for (k in 0 until 8) {
             val x = i + xDir[k]
             val y = j + yDir[k]
             reveal(x, y)
         }
-
     }
 
     private fun startTimer() {
@@ -270,12 +277,14 @@ class GameScreen : AppCompatActivity() {
     private fun setMines(i: Int, j: Int) {
 
         var mine = 0
-        while (mine <= mines) {
+        while (mine < mines) {
             val x = Random(System.nanoTime()).nextInt(0, rows)
             val y = Random(System.nanoTime()).nextInt(0, columns)
 
             if (x != i && y != j) {
-                if (checkSafeNeighbour(x, y)) {
+                if(x in i-1 until i+2 && y in j-1 until j+2)
+                    continue
+                if (!mineField[x][y].isMine && checkSafeNeighbour(x, y)) {
                     mineField[x][y].isMine = true
                     mineField[x][y].value = -1
                     mine++
@@ -284,6 +293,24 @@ class GameScreen : AppCompatActivity() {
             }
         }
     }
+
+    override fun onBackPressed() {
+        val dialog= AlertDialog.Builder(this)
+        with(dialog){
+            setTitle("Are you sure you want to quit?")
+            setPositiveButton("Yes"){_,_->
+                finish()
+                val intent = Intent(this@GameScreen,Levels::class.java)
+                startActivity(intent)
+            }
+            setNegativeButton("No"){_,_->
+                // Do Nothing
+            }
+        }
+        dialog.show()
+    }
+
+
 
     private fun plantValues(i: Int, j: Int) {
         for (k in 0 until 8) {
@@ -295,6 +322,21 @@ class GameScreen : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun restartGame(){
+        val dialog= AlertDialog.Builder(this)
+        with(dialog){
+            setTitle("Are you sure you want to restart?")
+            setPositiveButton("Yes"){_,_->
+                finish()
+                startActivity(intent)
+            }
+            setNegativeButton("No"){_,_->
+                // Do Nothing
+            }
+        }
+        dialog.show()
     }
 
 }
