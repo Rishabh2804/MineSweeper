@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
+import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
 import com.example.minesweeper.enums.Difficulties
@@ -21,7 +22,6 @@ class GameScreen : AppCompatActivity() {
 
     private var gameStatus = Status.NOT_STARTED
     private lateinit var mode: MineMode
-    var firstMove: Boolean = true
 
     private lateinit var mineIndicator: TextView
     private lateinit var flagBombSwitch: ImageButton
@@ -88,14 +88,19 @@ class GameScreen : AppCompatActivity() {
                 flagBombSwitch.setImageDrawable(
                     ContextCompat.getDrawable(
                         this,
-                        R.drawable.cutebomb
+                        R.drawable.flag
                     )
                 )
             } else {
-                flagBombSwitch.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.flag))
+                flagBombSwitch.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this,
+                        R.drawable.cutebomb
+                    )
+                )
             }
         }
-
+        setField()
     }
 
     private fun setField() { // Very Important
@@ -108,18 +113,19 @@ class GameScreen : AppCompatActivity() {
             LinearLayout.LayoutParams.MATCH_PARENT,
             0
         )
-
         var id = 1
         for (i in 0 until rows) {
             val linearLayout = LinearLayout(this)
             linearLayout.layoutParams = horizonParams
             linearLayout.orientation = LinearLayout.HORIZONTAL
-
+            horizonParams.weight = 1f
             for (j in 0 until columns) {
                 val button = MineFieldCell(this)
                 button.id = id
                 button.layoutParams = buttonParams
                 buttonParams.weight = 1.0F
+                button.setBackgroundResource(R.drawable.unrevealed_cell)
+                linearLayout.addView(button)
                 button.setOnClickListener {
                     if (gameStatus == Status.NOT_STARTED) {
                         startTimer()
@@ -128,21 +134,19 @@ class GameScreen : AppCompatActivity() {
                         setMines(i, j)
                     }
                     makeMove(i, j)
-
                     displayBoard()
                     checkWin()
-                    if (gameStatus != Status.ONGOING) {
-                        showResult()
-                    }
+//                    if (gameStatus != Status.ONGOING) {
+//                        showResult()
+//                    }
 
                 }
                 id++
                 mineField[i][j] = button
 
-                linearLayout.addView(button)
+
             }
             board.addView(linearLayout)
-
         }
     }
 
@@ -152,21 +156,25 @@ class GameScreen : AppCompatActivity() {
     }
 
     private fun displayBoard() {
-        for(i in 0 until rows)
-            for(j in 0 until columns){
-                with(mineField[i][j]){
-                if(isRevealed){
-                    displayRevealedCell(mineField[i][j])
-                } else {
-                    if(isFlagged){
-                        if(gameStatus== Status.LOST && !isMine)
-                            setBackgroundResource(R.drawable.flag)
-                        else
-                            setBackgroundResource(R.drawable.flag)
+        for (i in 0 until rows)
+            for (j in 0 until columns) {
+                with(mineField[i][j]) {
+                    if (isRevealed) {
+                        displayRevealedCell(mineField[i][j])
+                    } else {
+                        if (isFlagged) {
+                            if (gameStatus == Status.LOST && !isMine)
+                                setBackgroundResource(R.drawable.wrong_flag)
+                            else
+                                setBackgroundResource(R.drawable.right_flag)
+                        } else if (gameStatus == Status.LOST && isMine) {
+                            setBackgroundResource(R.drawable.darawnabomb)
+                        } else {
+                            setBackgroundResource(R.drawable.unrevealed_cell)
+                        }
                     }
                 }
             }
-        }
     }
 
     private fun makeMove(i: Int, j: Int) {
@@ -209,6 +217,8 @@ class GameScreen : AppCompatActivity() {
     }
 
     private fun reveal(i: Int, j: Int) {
+        if (i < 0 || i >= rows || j < 0 || j >= columns)
+            return
         if (mineField[i][j].isRevealed || mineField[i][j].isFlagged || mineField[i][j].isMine)
             return
 
@@ -229,9 +239,12 @@ class GameScreen : AppCompatActivity() {
     private fun displayRevealedCell(mineFieldCell: MineFieldCell) {
         with(mineFieldCell) {
             when (value) {
-                0 -> text = ""
+                0 -> setBackgroundResource(R.drawable.blank)
                 else -> {
                     text = value.toString()
+                    textSize = 34f
+                    textAlignment = View.TEXT_ALIGNMENT_CENTER
+                    setBackgroundResource(R.drawable.blank)
                     setTextColor(ContextCompat.getColor(context, cellColors[value - 1]))
                 }
 
@@ -257,7 +270,7 @@ class GameScreen : AppCompatActivity() {
     private fun setMines(i: Int, j: Int) {
 
         var mine = 0
-        while (mine < mines) {
+        while (mine <= mines) {
             val x = Random(System.nanoTime()).nextInt(0, rows)
             val y = Random(System.nanoTime()).nextInt(0, columns)
 

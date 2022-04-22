@@ -17,8 +17,8 @@ class Levels : AppCompatActivity() {
     private var level = Difficulties.NONE
 
     private val colors = arrayOf(
-        R.color.yellow,
         R.color.cyan,
+        R.color.yellow,
         R.color.red,
         R.color.black,
         R.color.un_selected
