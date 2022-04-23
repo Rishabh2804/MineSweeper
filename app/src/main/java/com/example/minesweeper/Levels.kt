@@ -136,6 +136,11 @@ class Levels : AppCompatActivity() {
 
         val customDiffMenu = findViewById<ConstraintLayout>(R.id.customDiff)
         customDiffMenu.isVisible = level == Difficulties.CUSTOM
+        customDiffMenu.setOnClickListener {
+            if(level == Difficulties.CUSTOM){
+                it.isVisible= true
+            }
+        }
 
         if (playbutton.isEnabled) {
             playbutton.setBackgroundColor(ContextCompat.getColor(this, R.color.play_button_enabled))

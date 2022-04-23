@@ -1,10 +1,12 @@
 package com.example.minesweeper
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.os.SystemClock
 import android.view.View
 import android.widget.*
@@ -72,7 +74,8 @@ class GameScreen : AppCompatActivity() {
 
         flags = mines
 
-        preferences= getSharedPreferences("GameStats", 0)
+        preferences= getSharedPreferences("GameStats", Context.MODE_PRIVATE)
+
         board = findViewById(R.id.playingArea)
         clock = findViewById(R.id.timer)
         mode = MineMode.REVEAL //Reveal mode by default
@@ -159,7 +162,105 @@ class GameScreen : AppCompatActivity() {
 
     private fun showResult() {
         clock.stop()
-        val current_score= (SystemClock.elapsedRealtime()-clock.base).toInt()
+        val timeElapsed= ((SystemClock.elapsedRealtime()-clock.base).toInt())/1000
+        var bestTime=preferences.getInt("best_time",0)
+        var bestScore=preferences.getInt("best_score",0)
+        if(gameStatus==Status.WON && (timeElapsed<bestTime||bestTime==0)){
+            bestTime=timeElapsed
+            preferences.edit().putInt("best_time",bestTime).apply()
+        }
+        for(i in 0 until rows) {
+            for (j in 0 until columns) {
+                mineField[i][j].isEnabled = false
+            }
+        }
+        val layout= this.layoutInflater.inflate(R.layout.score_card,null)
+        val dialog= AlertDialog.Builder(this)
+            .setView(layout)
+            .setCancelable(false)
+            .create()
+        if(gameStatus==Status.WON) {
+            val timeTaken = layout.findViewById<TextView>(R.id.user_time)
+            "${timeElapsed / 60} : ${timeElapsed % 60} ".also {
+                timeTaken.text = it
+                if(timeElapsed==bestTime){
+                    timeTaken.setTextColor(ContextCompat.getColor(this,R.color.red))
+                } else {
+                    timeTaken.setTextColor(ContextCompat.getColor(this,R.color.green))
+                }
+            }
+            val bestTimeTaken = layout.findViewById<TextView>(R.id.user_best_time)
+            if (bestTime == 0)
+                "No best time yet".also { bestTimeTaken.text = it }
+            else {
+                "${bestTime / 60} : ${bestTime % 60} ".also {
+                    bestTimeTaken.text = it
+                    bestTimeTaken.setTextColor(ContextCompat.getColor(this,R.color.red))
+                }
+            }
+
+            val expectedTime = (rows*columns*mines)/2
+            val currentScore = layout.findViewById<TextView>(R.id.user_score)
+
+            val winScore= (rows*rows)+(columns*columns)+(mines*mines)
+            val bonusScore= (expectedTime-timeElapsed)
+
+            val score=winScore+bonusScore
+            currentScore.text="$score"
+
+            val bestScoreTextview = layout.findViewById<TextView>(R.id.user_best_score)
+            val bonusOrPenaltyIcon = layout.findViewById<TextView>(R.id.bonus)
+            val bonusOrPenalty = layout.findViewById<TextView>(R.id.user_bonus_score)
+            if(bonusScore>0){
+                "Bonus Score ".also { bonusOrPenaltyIcon.text = it }
+                bonusOrPenaltyIcon.setTextColor(ContextCompat.getColor(this,
+                    android.R.color.holo_green_light
+                ))
+                bonusOrPenalty.text="$bonusScore"
+            }
+            else{
+                "Penalty  ".also { bonusOrPenaltyIcon.text = it }
+                bonusOrPenaltyIcon.setTextColor(ContextCompat.getColor(this,
+                    android.R.color.holo_red_light
+                ))
+                bonusOrPenalty.text="${-bonusScore}"
+            }
+            bonusOrPenalty.setTextColor(ContextCompat.getColor(this,R.color.black))
+            if(score>bestScore||bestScore==0){
+                bestScore=score
+                preferences.edit().putInt("best_score",bestScore).apply()
+            }
+            currentScore.text="$score"
+            "$bestScore".also { bestScoreTextview.text = it }
+            if(bestScore==score){
+                currentScore.setTextColor(ContextCompat.getColor(this,R.color.red))
+                bestScoreTextview.setTextColor(ContextCompat.getColor(this,R.color.red))
+            }
+            else {
+                currentScore.setTextColor(ContextCompat.getColor(this, R.color.green))
+                bestScoreTextview.setTextColor(ContextCompat.getColor(this, R.color.red))
+            }
+        }
+        Handler().postDelayed({
+            dialog.show()
+        },707)
+        val newGame= layout.findViewById<Button>(R.id.newGame)
+        newGame.setOnClickListener {
+            finish()
+            val intent = Intent(this, Levels::class.java)
+            startActivity(intent)
+        }
+
+        val replay= layout.findViewById<Button>(R.id.replay)
+        replay.setOnClickListener{
+            finish()
+            startActivity(intent)
+        }
+
+        val exit= layout.findViewById<Button>(R.id.exit)
+        exit.setOnClickListener{
+            finish()
+        }
     }
 
     private fun displayBoard() {
@@ -216,7 +317,7 @@ class GameScreen : AppCompatActivity() {
         }
     }
 
-    private fun checkWin() = if (((rows * columns) - revealedCells) == mines) {
+    private fun checkWin() = if (((rows * columns) - revealedCells) == mines && mines==0) {
         gameStatus = Status.WON
     } else {
         // Do Nothing.
@@ -324,7 +425,7 @@ class GameScreen : AppCompatActivity() {
         }
     }
 
-    private fun restartGame(){
+    private fun restartGame() {
         val dialog= AlertDialog.Builder(this)
         with(dialog){
             setTitle("Are you sure you want to restart?")
