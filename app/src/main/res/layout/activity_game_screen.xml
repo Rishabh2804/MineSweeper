@@ -10,35 +10,38 @@
         android:id="@+id/timer"
         android:layout_width="76dp"
         android:layout_height="29dp"
+        android:layout_marginEnd="10dp"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/flagBombSwitch"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.527" />
 
     <TextView
         android:id="@+id/mines"
         android:layout_width="64dp"
         android:layout_height="30dp"
-        android:layout_marginEnd="32dp"
         android:text="000"
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"
         app:layout_constraintEnd_toStartOf="@+id/flagBombSwitch"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/mineIMG"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.514" />
+        app:layout_constraintVertical_bias="0.457" />
 
     <ImageView
         android:id="@+id/mineIMG"
         android:layout_width="36dp"
         android:layout_height="30dp"
-        android:layout_marginEnd="9dp"
+        android:layout_marginStart="10dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"
-        app:layout_constraintEnd_toStartOf="@+id/mines"
-        app:layout_constraintHorizontal_bias="0.262"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.514"
+        app:layout_constraintVertical_bias="0.457"
         app:srcCompat="@drawable/mine" />
 
     <LinearLayout
@@ -69,11 +72,12 @@
 
     <ImageButton
         android:id="@+id/restart"
-        android:layout_width="99dp"
-        android:layout_height="51dp"
+        android:layout_width="86dp"
+        android:layout_height="56dp"
         android:layout_marginTop="12dp"
+        android:background="@android:color/transparent"
         android:foregroundGravity="center"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -86,16 +90,13 @@
         android:id="@+id/flagBombSwitch"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginEnd="100dp"
-        android:layout_marginBottom="5dp"
         android:background="@color/white"
         android:scaleType="fitXY"
         app:layout_constraintBottom_toTopOf="@+id/playingArea"
-        app:layout_constraintEnd_toStartOf="@+id/timer"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/cutebomb"
         tools:ignore="SpeakableTextPresentCheck" />
 

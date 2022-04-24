@@ -16,6 +16,7 @@ import android.text.format.DateFormat
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.text.HtmlCompat
 import com.example.minesweeper.structured_templates.*
 import java.io.File
@@ -58,8 +59,8 @@ class GameScreen : AppCompatActivity() {
         R.color.color8,
     )
 
-    // Shared preferences
-
+    // Shared preferences to get
+    // Difficulty-wise game board dimensions
     private lateinit var preferences: SharedPreferences
     private val difficulties = arrayOf(
         Dimensions(8, 8, 10),
@@ -67,6 +68,8 @@ class GameScreen : AppCompatActivity() {
         Dimensions(16, 16, 40),
     )
 
+    // Direction map -> xDir : horizontal, yDir : vertical
+    // To travel across all 8 adjacent cells of a cell
     private val xDir = arrayOf(0, 1, 0, -1, -1, 1, 1, -1)
     private val yDir = arrayOf(1, 0, -1, 0, 1, 1, -1, -1)
 
@@ -76,7 +79,11 @@ class GameScreen : AppCompatActivity() {
 
         val intent = intent
 
+        /* Set the mine field according to difficulty level
+        *  chosen by user on previous screen.
+        */
         val difficulty = intent.getIntExtra("Difficulty", 5)
+
         if (difficulty == Difficulties.CUSTOM.ordinal) {
             rows = intent.getIntExtra("Rows", 0)
             columns = intent.getIntExtra("Columns", 0)
@@ -87,25 +94,31 @@ class GameScreen : AppCompatActivity() {
             mines = difficulties[difficulty].mines
         }
 
+        // Number of flags would be exactly equal to number of mines
         flags = mines
 
         preferences = getSharedPreferences("GameStats", Context.MODE_PRIVATE)
 
+        // In-game stats indicators
         board = findViewById(R.id.playingArea)
         clock = findViewById(R.id.timer)
-        mode = MineMode.REVEAL //Reveal mode by default
-
         mineIndicator = findViewById(R.id.mines)
         mineIndicator.text = mines.toString()
 
+        // mine mode to reveal or flag a cell
+        mode = MineMode.REVEAL // Reveal mode by default
+
+        // Switch to transition between flag and reveal modes
         flagBombSwitch = findViewById(R.id.flagBombSwitch)
         flagBombSwitch.setOnClickListener {
 
+            // Toggle mine mode on click
             mode = if (mode == MineMode.FLAG)
                 MineMode.REVEAL
             else
                 MineMode.FLAG
 
+            // Change the image of the switch accordingly
             if (mode == MineMode.FLAG) {
                 flagBombSwitch.setImageDrawable(
                     ContextCompat.getDrawable(
@@ -122,42 +135,70 @@ class GameScreen : AppCompatActivity() {
                 )
             }
         }
+
+        // Restart button to reset the game
         restart = findViewById(R.id.restart)
         restart.setOnClickListener {
             restartGame()
         }
+
+        // Prepare the playing field for the game
         setField()
     }
 
-    private fun setField() { // Very Important
+    private fun setField() { // Initialize the playing field
+
+        // 2-D array to store the cells
         mineField = Array(rows) { Array(columns) { MineFieldCell(this) } }
+
+        // Layout parameters for the mine field
         val buttonParams = LinearLayout.LayoutParams(
-            0,
+
+            0, // Width according to number of columns
+
+            // Vertically fully stretched cell to fill the
+            // row width of the playing field
             LinearLayout.LayoutParams.MATCH_PARENT
         )
         val horizonParams = LinearLayout.LayoutParams(
+            // Horizontally fully stretched cell to fill the
+            // column width of the playing field
             LinearLayout.LayoutParams.MATCH_PARENT,
-            0
+
+            0 // Height according to the number of rows
         )
-        var id = 1
+
+        // Provide unique IDs to each cell
+        var id = 1 // ID = 1 for cell at (0,0)
+
         for (i in 0 until rows) {
+            // Each row is a LinearLayout
+            // to be added to the playing field
             val linearLayout = LinearLayout(this)
             linearLayout.layoutParams = horizonParams
             linearLayout.orientation = LinearLayout.HORIZONTAL
-            horizonParams.weight = 1f
+
+            horizonParams.weight = 1f // Equal width for each row
+
             for (j in 0 until columns) {
+                // Each cell is a Button view
+                // to be added to the row linear layout
                 val button = MineFieldCell(this)
-                button.id = id
+
+                button.id = id // Set the ID to the cell
                 button.layoutParams = buttonParams
-                buttonParams.weight = 1.0F
-                button.setBackgroundResource(R.drawable.unrevealedcell)
+                buttonParams.weight = 1.0F // Equal width for each cell
+
+                button.setBackgroundResource(R.drawable.unrevealedcell) // Cell unrevealed by default
                 linearLayout.addView(button)
+
                 button.setOnClickListener {
                     if (gameStatus == Status.NOT_STARTED) {
+                        // Start the game as and when the first cell is clicked
                         startTimer()
                         gameStatus = Status.ONGOING
                         Toast.makeText(this, "Don't die too soon!!", Toast.LENGTH_SHORT).show()
-                        setMines(i, j)
+                        setMines(i, j) // Set the mines in the field
                     }
                     makeMove(i, j)
                     displayBoard()
@@ -291,7 +332,7 @@ class GameScreen : AppCompatActivity() {
         }
         Handler().postDelayed({
             dialog.show()
-        }, 707)
+        }, 512)
         val newGame = layout.findViewById<Button>(R.id.newGame)
         newGame.setOnClickListener {
             finish()
@@ -310,7 +351,7 @@ class GameScreen : AppCompatActivity() {
             finish()
         }
 
-        val shareSS = layout.findViewById<Button>(R.id.share)
+        val shareSS = layout.findViewById<ImageButton>(R.id.share)
         shareSS.setOnClickListener {
             val view = window.decorView
             shareScreenShot(view)
@@ -404,12 +445,11 @@ class GameScreen : AppCompatActivity() {
                 0 -> setBackgroundResource(R.drawable.shape)
                 else -> {
                     text = value.toString()
-                    if (rows <= 10)
-                        textSize = 36f
-                    else if (rows <= 15)
-                        textSize = 28f
-                    else
-                        textSize = 20f
+                    textSize = when {
+                        rows <= 10 -> 36f
+                        rows <= 15 -> 28f
+                        else -> 20f
+                    }
                     textAlignment = View.TEXT_ALIGNMENT_CENTER
                     setBackgroundResource(R.drawable.shape)
                     setTextColor(ContextCompat.getColor(context, cellColors[value - 1]))
@@ -498,27 +538,30 @@ class GameScreen : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun shareScreenShot(view: View?) {
+    private fun shareScreenShot(view: View) {
         val date = Date()
         val format = DateFormat.format("dd-MM-yyyy_hh:mm:ss", date)
         val dir = File(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Screenshots")
         if (!dir.exists())
             dir.mkdirs()
         val path = "$dir/${format}.png"
-        val bitmap = view?.let {
-            Bitmap.createBitmap(it.width, it.height, Bitmap.Config.ARGB_8888)
-        }
+        view.isDrawingCacheEnabled = true
+        val bitmap = Bitmap.createBitmap(view.drawingCache)
+        view.isDrawingCacheEnabled = false
 
-        val canvas = Canvas(bitmap!!)
-        view?.draw(canvas)
         val imageFile = File(path)
         val outputStream = FileOutputStream(imageFile)
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream)
         outputStream.flush()
         outputStream.close()
+        val uri = FileProvider.getUriForFile(
+            this,
+            BuildConfig.APPLICATION_ID + "." + localClassName + ".provider",
+            imageFile
+        )
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "image/*"
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(path))
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
         intent.putExtra(Intent.EXTRA_TITLE, "Minesweeper")
         intent.putExtra(Intent.EXTRA_SUBJECT, "This made my Day!!")
         startActivity(Intent.createChooser(intent, "Share Image"))
