@@ -2,4 +2,8 @@
     <string name="app_name">MineSweeper</string>
     <string name="startGameMsg">On To The Battle Field!!</string>
     <string name="backgroundDesc">minesweeper background</string>
+    <string name="some_text">
+        <![CDATA[
+        <font color=\'#E68942\'>%1$s </font><font color=\'#1D9BF0\'>%2$s</font>]]>
+    </string>
 </resources>

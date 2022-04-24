@@ -4,36 +4,49 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.SystemClock
+import android.text.format.DateFormat
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
-import com.example.minesweeper.enums.Difficulties
-import com.example.minesweeper.enums.MineMode
-import com.example.minesweeper.enums.Status
+import androidx.core.text.HtmlCompat
+import com.example.minesweeper.structured_templates.*
+import java.io.File
+import java.io.FileOutputStream
+import java.util.*
 import kotlin.random.Random
 
 class GameScreen : AppCompatActivity() {
 
+    // Game variables
     private var rows = 0
     private var columns = 0
     private var mines = 0
     private var flags = 0
     private var revealedCells = 0
 
+    // Game state variables
     private var gameStatus = Status.NOT_STARTED
     private lateinit var mode: MineMode
 
+    // In-game stats indicators
     private lateinit var mineIndicator: TextView
     private lateinit var flagBombSwitch: ImageButton
     private lateinit var clock: Chronometer
     private lateinit var restart: ImageButton
 
+    // Game board
     private lateinit var mineField: Array<Array<MineFieldCell>>
     private lateinit var board: LinearLayout
+
+    // Color pallet for guider values (1 - 8)
     private val cellColors = arrayOf(
         R.color.color1,
         R.color.color2,
@@ -44,6 +57,8 @@ class GameScreen : AppCompatActivity() {
         R.color.color7,
         R.color.color8,
     )
+
+    // Shared preferences
 
     private lateinit var preferences: SharedPreferences
     private val difficulties = arrayOf(
@@ -135,7 +150,7 @@ class GameScreen : AppCompatActivity() {
                 button.id = id
                 button.layoutParams = buttonParams
                 buttonParams.weight = 1.0F
-                button.setBackgroundResource(R.drawable.unrevealed_cell)
+                button.setBackgroundResource(R.drawable.unrevealedcell)
                 linearLayout.addView(button)
                 button.setOnClickListener {
                     if (gameStatus == Status.NOT_STARTED) {
@@ -153,8 +168,6 @@ class GameScreen : AppCompatActivity() {
                 }
                 id++
                 mineField[i][j] = button
-
-
             }
             board.addView(linearLayout)
         }
@@ -175,32 +188,55 @@ class GameScreen : AppCompatActivity() {
             }
         }
         val layout = this.layoutInflater.inflate(R.layout.score_card, null)
+        val resultInWords = layout.findViewById<TextView>(R.id.result_in_words)
+        val name = preferences.getString("Name", "")
         val dialog = AlertDialog.Builder(this)
             .setView(layout)
             .setCancelable(false)
             .create()
+        val timeTaken = layout.findViewById<TextView>(R.id.user_time)
+        val bestTimeTaken = layout.findViewById<TextView>(R.id.user_best_time)
+        if (bestTime == 0)
+            "No best time yet".also { bestTimeTaken.text = it }
+        else {
+            val minute = bestTime / 60
+            val second = bestTime % 60
+            if (minute < 10 && second < 10)
+                "0$minute:0$second".also { bestTimeTaken.text = it }
+            else if (minute < 10)
+                "0$minute:$second".also { bestTimeTaken.text = it }
+            else if (second < 10)
+                "$minute:0$second".also { bestTimeTaken.text = it }
+            else
+                "$minute:$second".also { bestTimeTaken.text = it }
+            bestTimeTaken.setTextColor(ContextCompat.getColor(this, R.color.red))
+        }
+        val currentScore = layout.findViewById<TextView>(R.id.user_score)
+        val bestScoreTextview = layout.findViewById<TextView>(R.id.user_best_score)
+        val bonusOrPenalty = layout.findViewById<TextView>(R.id.user_bonus_score)
         if (gameStatus == Status.WON) {
-            val timeTaken = layout.findViewById<TextView>(R.id.user_time)
-            "${timeElapsed / 60} : ${timeElapsed % 60} ".also {
-                timeTaken.text = it
-                if (timeElapsed == bestTime) {
-                    timeTaken.setTextColor(ContextCompat.getColor(this, R.color.red))
-                } else {
-                    timeTaken.setTextColor(ContextCompat.getColor(this, R.color.green))
-                }
-            }
-            val bestTimeTaken = layout.findViewById<TextView>(R.id.user_best_time)
-            if (bestTime == 0)
-                "No best time yet".also { bestTimeTaken.text = it }
-            else {
-                "${bestTime / 60} : ${bestTime % 60} ".also {
-                    bestTimeTaken.text = it
-                    bestTimeTaken.setTextColor(ContextCompat.getColor(this, R.color.red))
-                }
+            val text1 = "Well Done, "
+            val text2 = "$name!!"
+            val text = this.getString(R.string.some_text, text1, text2)
+            resultInWords.text = (HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY))
+            val minute = timeElapsed / 60
+            val second = timeElapsed % 60
+            if (minute < 10 && second < 10)
+                "0$minute:0$second".also { timeTaken.text = it }
+            else if (minute < 10)
+                "0$minute:$second".also { timeTaken.text = it }
+            else if (second < 10)
+                "$minute:0$second".also { timeTaken.text = it }
+            else
+                "$minute:$second".also { timeTaken.text = it }
+
+            if (timeElapsed == bestTime) {
+                timeTaken.setTextColor(ContextCompat.getColor(this, R.color.red))
+            } else {
+                timeTaken.setTextColor(ContextCompat.getColor(this, R.color.green))
             }
 
             val expectedTime = (rows * columns * mines) / 2
-            val currentScore = layout.findViewById<TextView>(R.id.user_score)
 
             val winScore = (rows * rows) + (columns * columns) + (mines * mines)
             val bonusScore = (expectedTime - timeElapsed)
@@ -208,9 +244,7 @@ class GameScreen : AppCompatActivity() {
             val score = winScore + bonusScore
             currentScore.text = "$score"
 
-            val bestScoreTextview = layout.findViewById<TextView>(R.id.user_best_score)
             val bonusOrPenaltyIcon = layout.findViewById<TextView>(R.id.bonus)
-            val bonusOrPenalty = layout.findViewById<TextView>(R.id.user_bonus_score)
             if (bonusScore > 0) {
                 "Bonus Score ".also { bonusOrPenaltyIcon.text = it }
                 bonusOrPenaltyIcon.setTextColor(
@@ -244,6 +278,16 @@ class GameScreen : AppCompatActivity() {
                 currentScore.setTextColor(ContextCompat.getColor(this, R.color.green))
                 bestScoreTextview.setTextColor(ContextCompat.getColor(this, R.color.red))
             }
+        } else {
+            val text1 = "Better Luck Next Time, "
+            val text2 = "$name"
+            val text = this.getString(R.string.some_text, text1, text2)
+            resultInWords.text = (HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY))
+            timeTaken.text = "N/A"
+            currentScore.text = 0.toString()
+            "$bestScore".also { bestScoreTextview.text = it }
+            bestScoreTextview.setTextColor(ContextCompat.getColor(this, R.color.red))
+            bonusOrPenalty.text = "N/A"
         }
         Handler().postDelayed({
             dialog.show()
@@ -265,6 +309,12 @@ class GameScreen : AppCompatActivity() {
         exit.setOnClickListener {
             finish()
         }
+
+        val shareSS = layout.findViewById<Button>(R.id.share)
+        shareSS.setOnClickListener {
+            val view = window.decorView
+            shareScreenShot(view)
+        }
     }
 
     private fun displayBoard() {
@@ -282,7 +332,7 @@ class GameScreen : AppCompatActivity() {
                         } else if (gameStatus == Status.LOST && isMine) {
                             setBackgroundResource(R.drawable.darawnabomb)
                         } else {
-                            setBackgroundResource(R.drawable.unrevealed_cell)
+                            setBackgroundResource(R.drawable.unrevealedcell)
                         }
                     }
                 }
@@ -321,7 +371,7 @@ class GameScreen : AppCompatActivity() {
         }
     }
 
-    private fun checkWin() = if (((rows * columns) - revealedCells) == mines && mines == 0) {
+    private fun checkWin() = if (((rows * columns) - revealedCells) == mines) {
         gameStatus = Status.WON
     } else {
         // Do Nothing.
@@ -351,12 +401,17 @@ class GameScreen : AppCompatActivity() {
     private fun displayRevealedCell(mineFieldCell: MineFieldCell) {
         with(mineFieldCell) {
             when (value) {
-                0 -> setBackgroundResource(R.drawable.blank)
+                0 -> setBackgroundResource(R.drawable.shape)
                 else -> {
                     text = value.toString()
-                    textSize = 34f
+                    if (rows <= 10)
+                        textSize = 36f
+                    else if (rows <= 15)
+                        textSize = 28f
+                    else
+                        textSize = 20f
                     textAlignment = View.TEXT_ALIGNMENT_CENTER
-                    setBackgroundResource(R.drawable.blank)
+                    setBackgroundResource(R.drawable.shape)
                     setTextColor(ContextCompat.getColor(context, cellColors[value - 1]))
                 }
 
@@ -441,6 +496,32 @@ class GameScreen : AppCompatActivity() {
             }
         }
         dialog.show()
+    }
+
+    private fun shareScreenShot(view: View?) {
+        val date = Date()
+        val format = DateFormat.format("dd-MM-yyyy_hh:mm:ss", date)
+        val dir = File(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Screenshots")
+        if (!dir.exists())
+            dir.mkdirs()
+        val path = "$dir/${format}.png"
+        val bitmap = view?.let {
+            Bitmap.createBitmap(it.width, it.height, Bitmap.Config.ARGB_8888)
+        }
+
+        val canvas = Canvas(bitmap!!)
+        view?.draw(canvas)
+        val imageFile = File(path)
+        val outputStream = FileOutputStream(imageFile)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        outputStream.flush()
+        outputStream.close()
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(path))
+        intent.putExtra(Intent.EXTRA_TITLE, "Minesweeper")
+        intent.putExtra(Intent.EXTRA_SUBJECT, "This made my Day!!")
+        startActivity(Intent.createChooser(intent, "Share Image"))
     }
 
 }

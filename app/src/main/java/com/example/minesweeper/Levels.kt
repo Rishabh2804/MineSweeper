@@ -7,11 +7,10 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import com.example.minesweeper.enums.Difficulties
+import com.example.minesweeper.structured_templates.Difficulties
 
 class Levels : AppCompatActivity() {
     private var username: String? = ""

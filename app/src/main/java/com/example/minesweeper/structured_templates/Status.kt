@@ -1,4 +1,4 @@
-package com.example.minesweeper.enums
+package com.example.minesweeper.structured_templates
 
 // Game status enum
 enum class Status {

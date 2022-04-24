@@ -1,4 +1,4 @@
-package com.example.minesweeper.enums
+package com.example.minesweeper.structured_templates
 
 // Reveal mode properties for the mine field
 enum class MineMode {

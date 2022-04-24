@@ -1,4 +1,4 @@
-package com.example.minesweeper
+package com.example.minesweeper.structured_templates
 
 import android.content.Context
 import android.util.AttributeSet
