@@ -1,5 +1,9 @@
 package com.example.minesweeper.enums
 
 enum class Difficulties {
-    NOOB, SPECIALIST, VETERAN, CUSTOM, NONE
+    NOOB, // Easy Difficulty
+    SPECIALIST, // Medium Difficulty
+    VETERAN, // Hard Difficulty
+    CUSTOM, // Custom settings
+    NONE // No Difficulty Selected
 }

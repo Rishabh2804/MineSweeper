@@ -74,7 +74,7 @@ class GameScreen : AppCompatActivity() {
 
         flags = mines
 
-        preferences= getSharedPreferences("GameStats", Context.MODE_PRIVATE)
+        preferences = getSharedPreferences("GameStats", Context.MODE_PRIVATE)
 
         board = findViewById(R.id.playingArea)
         clock = findViewById(R.id.timer)
@@ -107,7 +107,7 @@ class GameScreen : AppCompatActivity() {
                 )
             }
         }
-        restart= findViewById(R.id.restart)
+        restart = findViewById(R.id.restart)
         restart.setOnClickListener {
             restartGame()
         }
@@ -162,31 +162,31 @@ class GameScreen : AppCompatActivity() {
 
     private fun showResult() {
         clock.stop()
-        val timeElapsed= ((SystemClock.elapsedRealtime()-clock.base).toInt())/1000
-        var bestTime=preferences.getInt("best_time",0)
-        var bestScore=preferences.getInt("best_score",0)
-        if(gameStatus==Status.WON && (timeElapsed<bestTime||bestTime==0)){
-            bestTime=timeElapsed
-            preferences.edit().putInt("best_time",bestTime).apply()
+        val timeElapsed = ((SystemClock.elapsedRealtime() - clock.base).toInt()) / 1000
+        var bestTime = preferences.getInt("best_time", 0)
+        var bestScore = preferences.getInt("best_score", 0)
+        if (gameStatus == Status.WON && (timeElapsed < bestTime || bestTime == 0)) {
+            bestTime = timeElapsed
+            preferences.edit().putInt("best_time", bestTime).apply()
         }
-        for(i in 0 until rows) {
+        for (i in 0 until rows) {
             for (j in 0 until columns) {
                 mineField[i][j].isEnabled = false
             }
         }
-        val layout= this.layoutInflater.inflate(R.layout.score_card,null)
-        val dialog= AlertDialog.Builder(this)
+        val layout = this.layoutInflater.inflate(R.layout.score_card, null)
+        val dialog = AlertDialog.Builder(this)
             .setView(layout)
             .setCancelable(false)
             .create()
-        if(gameStatus==Status.WON) {
+        if (gameStatus == Status.WON) {
             val timeTaken = layout.findViewById<TextView>(R.id.user_time)
             "${timeElapsed / 60} : ${timeElapsed % 60} ".also {
                 timeTaken.text = it
-                if(timeElapsed==bestTime){
-                    timeTaken.setTextColor(ContextCompat.getColor(this,R.color.red))
+                if (timeElapsed == bestTime) {
+                    timeTaken.setTextColor(ContextCompat.getColor(this, R.color.red))
                 } else {
-                    timeTaken.setTextColor(ContextCompat.getColor(this,R.color.green))
+                    timeTaken.setTextColor(ContextCompat.getColor(this, R.color.green))
                 }
             }
             val bestTimeTaken = layout.findViewById<TextView>(R.id.user_best_time)
@@ -195,70 +195,74 @@ class GameScreen : AppCompatActivity() {
             else {
                 "${bestTime / 60} : ${bestTime % 60} ".also {
                     bestTimeTaken.text = it
-                    bestTimeTaken.setTextColor(ContextCompat.getColor(this,R.color.red))
+                    bestTimeTaken.setTextColor(ContextCompat.getColor(this, R.color.red))
                 }
             }
 
-            val expectedTime = (rows*columns*mines)/2
+            val expectedTime = (rows * columns * mines) / 2
             val currentScore = layout.findViewById<TextView>(R.id.user_score)
 
-            val winScore= (rows*rows)+(columns*columns)+(mines*mines)
-            val bonusScore= (expectedTime-timeElapsed)
+            val winScore = (rows * rows) + (columns * columns) + (mines * mines)
+            val bonusScore = (expectedTime - timeElapsed)
 
-            val score=winScore+bonusScore
-            currentScore.text="$score"
+            val score = winScore + bonusScore
+            currentScore.text = "$score"
 
             val bestScoreTextview = layout.findViewById<TextView>(R.id.user_best_score)
             val bonusOrPenaltyIcon = layout.findViewById<TextView>(R.id.bonus)
             val bonusOrPenalty = layout.findViewById<TextView>(R.id.user_bonus_score)
-            if(bonusScore>0){
+            if (bonusScore > 0) {
                 "Bonus Score ".also { bonusOrPenaltyIcon.text = it }
-                bonusOrPenaltyIcon.setTextColor(ContextCompat.getColor(this,
-                    android.R.color.holo_green_light
-                ))
-                bonusOrPenalty.text="$bonusScore"
-            }
-            else{
+                bonusOrPenaltyIcon.setTextColor(
+                    ContextCompat.getColor(
+                        this,
+                        android.R.color.holo_green_light
+                    )
+                )
+                bonusOrPenalty.text = "$bonusScore"
+            } else {
                 "Penalty  ".also { bonusOrPenaltyIcon.text = it }
-                bonusOrPenaltyIcon.setTextColor(ContextCompat.getColor(this,
-                    android.R.color.holo_red_light
-                ))
-                bonusOrPenalty.text="${-bonusScore}"
+                bonusOrPenaltyIcon.setTextColor(
+                    ContextCompat.getColor(
+                        this,
+                        android.R.color.holo_red_light
+                    )
+                )
+                bonusOrPenalty.text = "${-bonusScore}"
             }
-            bonusOrPenalty.setTextColor(ContextCompat.getColor(this,R.color.black))
-            if(score>bestScore||bestScore==0){
-                bestScore=score
-                preferences.edit().putInt("best_score",bestScore).apply()
+            bonusOrPenalty.setTextColor(ContextCompat.getColor(this, R.color.black))
+            if (score > bestScore || bestScore == 0) {
+                bestScore = score
+                preferences.edit().putInt("best_score", bestScore).apply()
             }
-            currentScore.text="$score"
+            currentScore.text = "$score"
             "$bestScore".also { bestScoreTextview.text = it }
-            if(bestScore==score){
-                currentScore.setTextColor(ContextCompat.getColor(this,R.color.red))
-                bestScoreTextview.setTextColor(ContextCompat.getColor(this,R.color.red))
-            }
-            else {
+            if (bestScore == score) {
+                currentScore.setTextColor(ContextCompat.getColor(this, R.color.red))
+                bestScoreTextview.setTextColor(ContextCompat.getColor(this, R.color.red))
+            } else {
                 currentScore.setTextColor(ContextCompat.getColor(this, R.color.green))
                 bestScoreTextview.setTextColor(ContextCompat.getColor(this, R.color.red))
             }
         }
         Handler().postDelayed({
             dialog.show()
-        },707)
-        val newGame= layout.findViewById<Button>(R.id.newGame)
+        }, 707)
+        val newGame = layout.findViewById<Button>(R.id.newGame)
         newGame.setOnClickListener {
             finish()
             val intent = Intent(this, Levels::class.java)
             startActivity(intent)
         }
 
-        val replay= layout.findViewById<Button>(R.id.replay)
-        replay.setOnClickListener{
+        val replay = layout.findViewById<Button>(R.id.replay)
+        replay.setOnClickListener {
             finish()
             startActivity(intent)
         }
 
-        val exit= layout.findViewById<Button>(R.id.exit)
-        exit.setOnClickListener{
+        val exit = layout.findViewById<Button>(R.id.exit)
+        exit.setOnClickListener {
             finish()
         }
     }
@@ -317,7 +321,7 @@ class GameScreen : AppCompatActivity() {
         }
     }
 
-    private fun checkWin() = if (((rows * columns) - revealedCells) == mines && mines==0) {
+    private fun checkWin() = if (((rows * columns) - revealedCells) == mines && mines == 0) {
         gameStatus = Status.WON
     } else {
         // Do Nothing.
@@ -330,7 +334,7 @@ class GameScreen : AppCompatActivity() {
             return
         revealedCells++
         mineField[i][j].isRevealed = true
-        if(mineField[i][j].value!=0)
+        if (mineField[i][j].value != 0)
             return
         for (k in 0 until 8) {
             val x = i + xDir[k]
@@ -383,7 +387,7 @@ class GameScreen : AppCompatActivity() {
             val y = Random(System.nanoTime()).nextInt(0, columns)
 
             if (x != i && y != j) {
-                if(x in i-1 until i+2 && y in j-1 until j+2)
+                if (x in i - 1 until i + 2 && y in j - 1 until j + 2)
                     continue
                 if (!mineField[x][y].isMine && checkSafeNeighbour(x, y)) {
                     mineField[x][y].isMine = true
@@ -396,21 +400,20 @@ class GameScreen : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        val dialog= AlertDialog.Builder(this)
-        with(dialog){
+        val dialog = AlertDialog.Builder(this)
+        with(dialog) {
             setTitle("Are you sure you want to quit?")
-            setPositiveButton("Yes"){_,_->
+            setPositiveButton("Yes") { _, _ ->
                 finish()
-                val intent = Intent(this@GameScreen,Levels::class.java)
+                val intent = Intent(this@GameScreen, Levels::class.java)
                 startActivity(intent)
             }
-            setNegativeButton("No"){_,_->
+            setNegativeButton("No") { _, _ ->
                 // Do Nothing
             }
         }
         dialog.show()
     }
-
 
 
     private fun plantValues(i: Int, j: Int) {
@@ -426,14 +429,14 @@ class GameScreen : AppCompatActivity() {
     }
 
     private fun restartGame() {
-        val dialog= AlertDialog.Builder(this)
-        with(dialog){
+        val dialog = AlertDialog.Builder(this)
+        with(dialog) {
             setTitle("Are you sure you want to restart?")
-            setPositiveButton("Yes"){_,_->
+            setPositiveButton("Yes") { _, _ ->
                 finish()
                 startActivity(intent)
             }
-            setNegativeButton("No"){_,_->
+            setNegativeButton("No") { _, _ ->
                 // Do Nothing
             }
         }
