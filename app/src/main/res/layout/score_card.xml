@@ -5,14 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="#69C5B7"
     app:cardCornerRadius="16dp"
-    app:cardElevation="8dp"
-    android:background="#EEF891">
+    app:cardElevation="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#EEF891">
+        android:background="#F5FBB3">
 
         <TextView
             android:id="@+id/result_in_words"
@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="10dp"
             app:cardBackgroundColor="@color/play_button_enabled"
             app:cardCornerRadius="16dp"
@@ -178,16 +178,15 @@
             android:id="@+id/newGame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="8dp"
             android:text="New Game"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/exit" />
+            app:layout_constraintTop_toTopOf="@+id/mainMenu" />
 
         <Button
-            android:id="@+id/exit"
+            android:id="@+id/mainMenu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
             android:text="Exit"
             app:layout_constraintEnd_toStartOf="@+id/newGame"
             app:layout_constraintStart_toEndOf="@+id/replay"
@@ -197,7 +196,7 @@
             android:id="@+id/replay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
             android:text="Replay"
             app:layout_constraintStart_toStartOf="parent"
@@ -218,7 +217,7 @@
             tools:ignore="SpeakableTextPresentCheck" />
 
         <ImageButton
-            android:id="@+id/screenshot"
+            android:id="@+id/mascot"
             android:layout_width="61dp"
             android:layout_height="58dp"
             android:background="@android:color/transparent"
@@ -229,7 +228,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.044"
-            app:srcCompat="@drawable/ic_baseline_camera_24"
+            app:srcCompat="@drawable/cutebomb"
             tools:ignore="SpeakableTextPresentCheck" />
 
         <androidx.constraintlayout.widget.Guideline
