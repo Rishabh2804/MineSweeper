@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MineSweeper">
         <activity
+            android:name=".MainActivity2"
+            android:exported="false" />
+        <activity
             android:name=".GameScreen"
             android:exported="false" />
         <activity
@@ -23,13 +26,14 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.example.minesweeper.MainActivity.provider"
+            android:authorities="com.example.minesweeper.GameScreen.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -37,4 +41,5 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
+
 </manifest>
