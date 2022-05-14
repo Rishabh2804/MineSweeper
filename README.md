@@ -14,8 +14,4 @@ An alert dialogue is displayed when the game is finished and user can do the fol
 1. Share current game status with friends
 2. Play Again (with the same difficulty)
 3. Go to Main Menu
-<<<<<<< HEAD
 4. Start a new game with a different difficulty
-=======
-4. Start a new game with a different difficulty
->>>>>>> b32c5ee81aa2e4985917407b03650dd2d91defa9
